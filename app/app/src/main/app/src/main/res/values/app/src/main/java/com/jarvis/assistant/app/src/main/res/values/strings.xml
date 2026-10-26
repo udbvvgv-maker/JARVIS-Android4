@@ -1,0 +1,8 @@
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">JARVIS</string>
+    <string name="assistant_name">JARVIS</string>
+    <string name="wake_word">Jarvis</string>
+    <string name="welcome_message">Hello! I am JARVIS. How can I help you?</string>
+</resources>
