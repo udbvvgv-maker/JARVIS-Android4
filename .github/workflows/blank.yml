@@ -25,13 +25,32 @@ jobs:
       - name: Accept Android licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
 
-      - name: Build APK
+      - name: Find project folder
+        id: find
         run: |
-          chmod +x ./gradlew
-          ./gradlew assembleDebug --stacktrace
+          echo "Repo files:"
+          ls -la
+          SETTINGS=$(find . -maxdepth 3 \( -name settings.gradle -o -name settings.gradle.kts \) | head -n 1)
+          if [ -z "$SETTINGS" ]; then
+            echo "::error::settings.gradle not found. This is not an Android Gradle project."
+            exit 1
+          fi
+          DIR=$(dirname "$SETTINGS")
+          echo "Project dir: $DIR"
+          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
+
+      - name: Build APK
+        working-directory: ${{ steps.find.outputs.dir }}
+        run: |
+          if [ -f ./gradlew ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug --stacktrace
+          else
+            gradle assembleDebug --stacktrace
+          fi
 
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
           name: JARVIS-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: ${{ steps.find.outputs.dir }}/**/build/outputs/apk/debug/*.apk
